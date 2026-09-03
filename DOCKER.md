@@ -1,22 +1,19 @@
 # Nasazení přes Docker
 
-Repozitář obsahuje hotovou sestavu. Složka `modules/` je namountovaná jako
-addons, takže se moduly nikam nekopírují — stačí je mít v repozitáři.
+Celý repozitář se v kontejneru mountuje do `/mnt/modules`. Moduly jsou v něm
+po projektech, `vet/` jsou moduly Elite Vet. Nic se nikam nekopíruje.
 
 ---
 
 ## A) Nová instalace na čistém stroji
 
 ```bash
-git clone https://github.com/goatrental/Elite.vet.git
-cd Elite.vet
+git clone https://github.com/goatrental/Modules.git
+cd Modules
 docker compose up -d
 ```
 
-Odoo naběhne na `http://localhost:8069`, založí se databáze a v seznamu
-aplikací je **Rozpis služeb**.
-
-Instalace modulu z příkazové řádky:
+Odoo naběhne na `http://localhost:8069`. Instalace modulu:
 
 ```bash
 docker compose exec odoo odoo -d NAZEV_DATABAZE -i rozpis --stop-after-init
@@ -32,40 +29,43 @@ docker compose restart odoo
 
 ### Krok 0 — smazat stávající ruční stránku
 
-**Nepřeskakovat.** Stránka `/rozpis-lekaru` je teď v databázi vložená ručně.
-Kdyby tam zůstala, modul narazí na stejnou URL a instalace spadne.
+Pokud v databázi ještě je ručně vytvořená stránka `/rozpis-lekaru`, musí pryč,
+jinak modul narazí na stejnou URL a instalace spadne.
 
 Web → Stránky → `/rozpis-lekaru` → smazat.
 
 Na téhle stránce nejsou žádné překlady, takže se smazáním nic neztratí.
 
-### Krok 1 — zjistit addons path
+### Krok 1 — naklonovat repozitář na server
+
+Kamkoli, kde na něj kontejner dosáhne, například vedle `docker-compose.yml`:
 
 ```bash
-docker compose exec odoo cat /etc/odoo/odoo.conf | grep addons_path
+git clone https://github.com/goatrental/Modules.git
 ```
 
-Odpovídající složku na hostiteli najdete v `docker-compose.yml` v sekci
-`volumes`, typicky `./addons:/mnt/extra-addons`.
+### Krok 2 — namountovat a přidat do addons_path
 
-### Krok 2 — naklonovat repozitář do addons složky
+Do `docker-compose.yml` běžícího Odoo přidat volume:
 
-```bash
-cd /cesta/k/addons
-git clone https://github.com/goatrental/Elite.vet.git elitevet
+```yaml
+volumes:
+  - ./Modules:/mnt/modules:ro
 ```
 
-Vznikne `/cesta/k/addons/elitevet/modules/rozpis/`. Do `addons_path` se pak
-přidá cesta k `modules`:
+A do `odoo.conf` cestu ke složce projektu:
 
 ```ini
-addons_path = /mnt/extra-addons/elitevet/modules,/mnt/extra-addons,/usr/lib/python3/dist-packages/odoo/addons
+addons_path = /mnt/modules/vet,/mnt/extra-addons,/usr/lib/python3/dist-packages/odoo/addons
 ```
+
+> Do `addons_path` patří složka **projektu** (`/mnt/modules/vet`), ne složka
+> modulu. Odoo si moduly uvnitř najde samo.
 
 Aktualizace později:
 
 ```bash
-cd /cesta/k/addons/elitevet
+cd Modules
 git pull
 ```
 
@@ -75,13 +75,13 @@ Odoo v oficiálním image běží pod UID 101. Pokud se modul v seznamu aplikac�
 neobjeví, bývá to právy:
 
 ```bash
-sudo chown -R 101:101 /cesta/k/addons/elitevet
+sudo chown -R 101:101 Modules
 ```
 
 ### Krok 4 — instalace
 
 ```bash
-docker compose restart odoo
+docker compose up -d
 docker compose exec odoo odoo -d NAZEV_DATABAZE -i rozpis --stop-after-init
 docker compose restart odoo
 ```
@@ -113,10 +113,10 @@ Mřížka bude po instalaci prázdná — naplní se v Odoo v aplikaci
 
 | příznak | příčina |
 |---|---|
-| není v Aplikacích ani po *Aktualizovat seznam aplikací* | složka `modules` není v `addons_path` |
+| není v Aplikacích ani po *Aktualizovat seznam aplikací* | v `addons_path` chybí `/mnt/modules/vet`, nebo je tam uvedená složka modulu místo složky projektu |
 | v logu `Skipped unreadable module` | práva, viz krok 3 |
 | instalace spadne na duplicitní URL | nesmazaná ruční stránka `/rozpis-lekaru`, viz krok 0 |
-| aplikace je vidět, ale stránka hlásí 404 | modul nainstalovaný, ale web není publikovaný — Web → Stránky |
+| aplikace je vidět, ale stránka hlásí 404 | modul nainstalovaný, ale stránka není publikovaná — Web → Stránky |
 
 Log kontejneru:
 

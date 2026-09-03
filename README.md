@@ -1,54 +1,64 @@
-# Elite Vet — Odoo moduly
+# Modules
 
-Repozitář s moduly pro Odoo 18 kliniky Elite Vet a s Docker sestavou, která je
-používá.
+Odoo 18 moduly a Docker sestava, která je používá. Moduly jsou seřazené
+po projektech.
 
 ```
-Elite.vet/
-├── docker-compose.yml     Odoo 18 + PostgreSQL, ./modules jako addons
+Modules/
+├── docker-compose.yml     Odoo 18 + PostgreSQL
 ├── config/odoo.conf       addons_path, připojení k databázi
-└── modules/
+└── vet/                   Elite Vet
     └── rozpis/            Rozpis služeb lékařů
 ```
 
-Nový modul = nová podsložka v `modules/`. Nic dalšího se nenastavuje, Docker
-tu složku už má namountovanou jako addons.
+Celý repozitář je v kontejneru namountovaný do `/mnt/modules`.
+
+**Nový modul stejného projektu** = nová podsložka v `vet/`. Nic se nenastavuje.
+
+**Nový projekt** = nová složka vedle `vet/` a jeden záznam navíc
+v `addons_path` v [config/odoo.conf](config/odoo.conf):
+
+```ini
+addons_path = /mnt/modules/vet,/mnt/modules/dalsi-projekt,/usr/lib/python3/dist-packages/odoo/addons
+```
 
 ## Spuštění
 
 ```bash
-git clone https://github.com/goatrental/Elite.vet.git
-cd Elite.vet
+git clone https://github.com/goatrental/Modules.git
+cd Modules
 docker compose up -d
 ```
 
-Odoo běží na `http://localhost:8069`. Podrobnosti a nasazení na existující
-server jsou v [DOCKER.md](DOCKER.md).
+Odoo běží na `http://localhost:8069`. Nasazení na existující server je
+v [DOCKER.md](DOCKER.md).
 
-## Moduly
+## vet — Elite Vet
 
 ### `rozpis` — Rozpis služeb
 
-Přidává aplikaci **Rozpis služeb** a veřejnou stránku `/rozpis-lekaru`
-s měsíčním kalendářem.
+Aplikace **Rozpis služeb** a veřejná stránka `/rozpis-lekaru` s měsíčním
+kalendářem. Aplikace má tři položky a nic víc.
 
-Zadávání je záměrně co nejjednodušší — jeden řádek má tři údaje:
+**Rozpis** — jeden řádek má tři údaje:
 
 | Pole | Hodnota |
 |---|---|
 | Datum | den služby |
-| Lékařka | výběr ze seznamu lékařek kliniky |
-| Směna | Ranní / Odpolední / Noční / Víkendová / Zavřeno |
+| Lékařka | výběr ze seznamu |
+| Směna | výběr z typů směn |
 
-Časy se u směny nezadávají, nese je její typ. V položce **Typy směn** jde
-změnit čas i barvu a projeví se to na webu:
+**Lékařky** — jméno a konec.
 
-| Směna | Čas | Barva na webu |
-|---|---|---|
-| Ranní | 8:00–14:00 | zelená |
-| Odpolední | 14:00–20:00 | oranžová |
-| Noční | 20:00–8:00 | fialová |
-| Víkendová | 10:00–18:00 | růžová |
-| Zavřeno | — | červený text z poznámky |
+**Typy směn** — tady se mění čas i barva směny. Změna se hned promítne na web,
+do vysvětlivek i do bublin u jmen.
 
-Detaily v [modules/rozpis/README.md](modules/rozpis/README.md).
+| Název | Od | Do | Barva |
+|---|---|---|---|
+| Ranní služba | 8:00 | 14:00 | zelená |
+| Odpolední služba | 14:00 | 20:00 | oranžová |
+| Noční služba | 20:00 | 8:00 | fialová |
+| Víkendová služba | 10:00 | 18:00 | růžová |
+| Zavřeno | — | — | červená |
+
+Detaily v [vet/rozpis/README.md](vet/rozpis/README.md).
