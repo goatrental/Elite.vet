@@ -1,130 +1,111 @@
-# Nasazení modulu `elite_vet_rozpis` do Odoo v Dockeru
+# Nasazení přes Docker
 
-Modul je čistě datový (QWeb šablona + záznam stránky + štítek), nemá Python kód
-a nepotřebuje žádné build kroky ani další balíčky. Stačí ho dostat do addons
-složky, kterou má kontejner namountovanou, a nainstalovat.
+Repozitář obsahuje hotovou sestavu. Složka `modules/` je namountovaná jako
+addons, takže se moduly nikam nekopírují — stačí je mít v repozitáři.
 
 ---
 
-## Krok 0 — nejdřív smazat stávající ruční stránku
+## A) Nová instalace na čistém stroji
 
-**Tohle nepřeskakovat.** Stránka `/rozpis-lekaru` je teď v databázi vložená ručně.
+```bash
+git clone https://github.com/goatrental/Elite.vet.git
+cd Elite.vet
+docker compose up -d
+```
+
+Odoo naběhne na `http://localhost:8069`, založí se databáze a v seznamu
+aplikací je **Rozpis služeb**.
+
+Instalace modulu z příkazové řádky:
+
+```bash
+docker compose exec odoo odoo -d NAZEV_DATABAZE -i rozpis --stop-after-init
+docker compose restart odoo
+```
+
+> Před ostrým provozem změňte `admin_passwd` v `config/odoo.conf` a hesla
+> databáze v `docker-compose.yml`.
+
+---
+
+## B) Nasazení do už běžícího Odoo v Dockeru
+
+### Krok 0 — smazat stávající ruční stránku
+
+**Nepřeskakovat.** Stránka `/rozpis-lekaru` je teď v databázi vložená ručně.
 Kdyby tam zůstala, modul narazí na stejnou URL a instalace spadne.
 
 Web → Stránky → `/rozpis-lekaru` → smazat.
 
 Na téhle stránce nejsou žádné překlady, takže se smazáním nic neztratí.
 
----
-
-## Krok 1 — zjistit, kam kontejner kouká pro addons
+### Krok 1 — zjistit addons path
 
 ```bash
 docker compose exec odoo cat /etc/odoo/odoo.conf | grep addons_path
 ```
 
-Typicky je to `/mnt/extra-addons`. Odpovídající složku na hostiteli najdete
-v `docker-compose.yml` v sekci `volumes`, například:
+Odpovídající složku na hostiteli najdete v `docker-compose.yml` v sekci
+`volumes`, typicky `./addons:/mnt/extra-addons`.
 
-```yaml
-volumes:
-  - ./addons:/mnt/extra-addons
-```
-
-Tady by hostitelská složka byla `./addons`.
-
----
-
-## Krok 2 — dostat modul do té složky
-
-### Varianta A — klonovat z gitu (doporučeno, jde snadno aktualizovat)
+### Krok 2 — naklonovat repozitář do addons složky
 
 ```bash
 cd /cesta/k/addons
-git clone https://github.com/goatrental/Elite.vet.git elite_vet_rozpis
+git clone https://github.com/goatrental/Elite.vet.git elitevet
 ```
 
-Vznikne `/cesta/k/addons/elite_vet_rozpis/__manifest__.py`, což je přesně to,
-co Odoo potřebuje. Nic se nekopíruje ani nepřesouvá.
+Vznikne `/cesta/k/addons/elitevet/modules/rozpis/`. Do `addons_path` se pak
+přidá cesta k `modules`:
 
-> Ten `elite_vet_rozpis` na konci příkazu je povinný. Repozitář se jmenuje
-> `Elite.vet`, ale složka modulu se musí jmenovat `elite_vet_rozpis` — název
-> složky je pro Odoo zároveň názvem modulu a tečku v něm mít nesmí.
+```ini
+addons_path = /mnt/extra-addons/elitevet/modules,/mnt/extra-addons,/usr/lib/python3/dist-packages/odoo/addons
+```
 
 Aktualizace později:
 
 ```bash
-cd /cesta/k/addons/elite_vet_rozpis
+cd /cesta/k/addons/elitevet
 git pull
 ```
 
-pak `-u elite_vet_rozpis` (viz krok 4).
+### Krok 3 — práva
 
-### Varianta B — rozbalit ZIP
-
-GitHub → **Code → Download ZIP**. Rozbalit a nakopírovat tak, aby vznikla cesta
-`/cesta/k/addons/elite_vet_rozpis/__manifest__.py`.
-
-> Pozor na jednu častou chybu: `__manifest__.py` musí ležet **přímo** ve složce
-> `elite_vet_rozpis`. Když se rozbalením vytvoří o úroveň víc
-> (`elite_vet_rozpis/Elite.vet-main/__manifest__.py`), Odoo modul neuvidí.
-> ZIP z GitHubu se rozbalí jako `Elite.vet-main`, je potřeba tu složku
-> přejmenovat na `elite_vet_rozpis`.
-
----
-
-## Krok 3 — práva
-
-Odoo v oficiálním image běží pod uživatelem `odoo` (UID 101). Pokud se modul
-v seznamu aplikací neobjeví, bývá to právy:
+Odoo v oficiálním image běží pod UID 101. Pokud se modul v seznamu aplikací
+neobjeví, bývá to právy:
 
 ```bash
-sudo chown -R 101:101 /cesta/k/addons/elite_vet_rozpis
+sudo chown -R 101:101 /cesta/k/addons/elitevet
 ```
 
----
-
-## Krok 4 — instalace
-
-### Z příkazové řádky (spolehlivější než klikání)
+### Krok 4 — instalace
 
 ```bash
-docker compose exec odoo odoo \
-    -d NAZEV_DATABAZE \
-    -i elite_vet_rozpis \
-    --stop-after-init
-
+docker compose restart odoo
+docker compose exec odoo odoo -d NAZEV_DATABAZE -i rozpis --stop-after-init
 docker compose restart odoo
 ```
 
-Aktualizace po změně kódu — stejný příkaz, jen `-i` nahradit za `-u`:
+Aktualizace po změně kódu — místo `-i` použít `-u`:
 
 ```bash
-docker compose exec odoo odoo -d NAZEV_DATABAZE -u elite_vet_rozpis --stop-after-init
+docker compose exec odoo odoo -d NAZEV_DATABAZE -u rozpis --stop-after-init
 docker compose restart odoo
 ```
 
-### Nebo přes rozhraní
+Nebo přes rozhraní: zapnout vývojářský režim → Aplikace → **Aktualizovat
+seznam aplikací** → hledat `Rozpis` → Instalovat.
 
-1. `docker compose restart odoo`
-2. Zapnout vývojářský režim (Nastavení → dole *Aktivovat vývojářský režim*)
-3. Aplikace → **Aktualizovat seznam aplikací**
-4. Vymazat filtr *Aplikace*, hledat `Elite Vet` → **Instalovat**
-
----
-
-## Krok 5 — kontrola
+### Krok 5 — kontrola
 
 ```bash
 curl -s -o /dev/null -w "%{http_code}\n" https://elite-vet.cz/rozpis-lekaru
 ```
 
-Očekávaná odpověď `200`. Stránka je publikovaná rovnou modulem, nic se
-nemusí zapínat ručně.
+Očekávaná odpověď `200`. Stránka je publikovaná rovnou modulem.
 
-Mřížka bude po instalaci prázdná — naplní se až událostmi v aplikaci
-**Kalendář** se štítkem **`Rozpis služeb`**. Postup je v
-[`README.md`](README.md).
+Mřížka bude po instalaci prázdná — naplní se v Odoo v aplikaci
+**Rozpis služeb**.
 
 ---
 
@@ -132,59 +113,13 @@ Mřížka bude po instalaci prázdná — naplní se až událostmi v aplikaci
 
 | příznak | příčina |
 |---|---|
-| není v Aplikacích ani po *Aktualizovat seznam aplikací* | složka není v `addons_path`, nebo je o úroveň zanořená navíc |
+| není v Aplikacích ani po *Aktualizovat seznam aplikací* | složka `modules` není v `addons_path` |
 | v logu `Skipped unreadable module` | práva, viz krok 3 |
-| v Aplikacích nic, filtr *Aplikace* aktivní | modul má `application: False`, filtr je potřeba smazat |
 | instalace spadne na duplicitní URL | nesmazaná ruční stránka `/rozpis-lekaru`, viz krok 0 |
+| aplikace je vidět, ale stránka hlásí 404 | modul nainstalovaný, ale web není publikovaný — Web → Stránky |
 
 Log kontejneru:
 
 ```bash
 docker compose logs -f --tail=100 odoo
-```
-
----
-
-## Ukázkový docker-compose.yml
-
-Pro srovnání, kdyby se addons volume teprve doplňoval. **Existující nasazení
-tímhle nepřepisujte**, důležitý je jen řádek s `extra-addons`.
-
-```yaml
-services:
-  odoo:
-    image: odoo:18
-    depends_on:
-      - db
-    ports:
-      - "8069:8069"
-    volumes:
-      - odoo-data:/var/lib/odoo
-      - ./addons:/mnt/extra-addons      # sem patri slozka elite_vet_rozpis
-      - ./config:/etc/odoo
-    restart: unless-stopped
-
-  db:
-    image: postgres:16
-    environment:
-      POSTGRES_DB: postgres
-      POSTGRES_USER: odoo
-      POSTGRES_PASSWORD: odoo
-    volumes:
-      - db-data:/var/lib/postgresql/data
-    restart: unless-stopped
-
-volumes:
-  odoo-data:
-  db-data:
-```
-
-A odpovídající `config/odoo.conf`:
-
-```ini
-[options]
-addons_path = /mnt/extra-addons,/usr/lib/python3/dist-packages/odoo/addons
-db_host = db
-db_user = odoo
-db_password = odoo
 ```

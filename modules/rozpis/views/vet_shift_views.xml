@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--
+        Cele ovladani rozpisu jsou tri sloupce: Datum, Lekarka, Smena.
+        Casy se nezadavaji, jsou dane typem smeny. Poznamka je skryty sloupec
+        a pouziva se jen u zavreno.
+    -->
+
+    <record id="view_vet_shift_list" model="ir.ui.view">
+        <field name="name">elite.vet.shift.list</field>
+        <field name="model">elite.vet.shift</field>
+        <field name="arch" type="xml">
+            <list string="Rozpis služeb" editable="bottom" multi_edit="1">
+                <field name="date" string="Datum"/>
+                <field name="doctor_id" string="Lékařka"/>
+                <field name="shift_type" string="Směna"/>
+                <field name="note" string="Poznámka" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_vet_shift_form" model="ir.ui.view">
+        <field name="name">elite.vet.shift.form</field>
+        <field name="model">elite.vet.shift</field>
+        <field name="arch" type="xml">
+            <form string="Směna">
+                <sheet>
+                    <group>
+                        <field name="date"/>
+                        <field name="shift_type"/>
+                        <field name="doctor_id" invisible="shift_type == 'closed'"/>
+                        <field name="note" invisible="shift_type != 'closed'" placeholder="např. Státní svátek"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_vet_shift_calendar" model="ir.ui.view">
+        <field name="name">elite.vet.shift.calendar</field>
+        <field name="model">elite.vet.shift</field>
+        <field name="arch" type="xml">
+            <calendar string="Rozpis služeb" date_start="date" color="shift_type" mode="month" event_limit="6">
+                <field name="doctor_id"/>
+                <field name="shift_type"/>
+            </calendar>
+        </field>
+    </record>
+
+    <record id="view_vet_shift_search" model="ir.ui.view">
+        <field name="name">elite.vet.shift.search</field>
+        <field name="model">elite.vet.shift</field>
+        <field name="arch" type="xml">
+            <search string="Rozpis služeb">
+                <field name="doctor_id"/>
+                <field name="date"/>
+                <filter name="od_dneska" string="Od dneška"
+                        domain="[('date', '&gt;=', context_today().strftime('%Y-%m-%d'))]"/>
+                <group expand="0" string="Seskupit podle">
+                    <filter name="group_doctor" string="Lékařka" context="{'group_by': 'doctor_id'}"/>
+                    <filter name="group_type" string="Směna" context="{'group_by': 'shift_type'}"/>
+                    <filter name="group_date" string="Měsíc" context="{'group_by': 'date:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_vet_shift" model="ir.actions.act_window">
+        <field name="name">Rozpis</field>
+        <field name="res_model">elite.vet.shift</field>
+        <field name="view_mode">list,calendar,form</field>
+        <field name="context">{'search_default_od_dneska': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Přidejte první směnu</p>
+            <p>Vyplňte datum, vyberte lékařku a typ směny. Víc není potřeba —
+               na webu se to objeví samo.</p>
+        </field>
+    </record>
+</odoo>
