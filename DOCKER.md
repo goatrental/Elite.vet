@@ -1,15 +1,15 @@
 # Nasazení přes Docker
 
 Celý repozitář se v kontejneru mountuje do `/mnt/modules`. Moduly jsou v něm
-po projektech, `vet/` jsou moduly Elite Vet. Nic se nikam nekopíruje.
+po projektech, `elite.vet/` jsou moduly Elite Vet. Nic se nikam nekopíruje.
 
 ---
 
 ## A) Nová instalace na čistém stroji
 
 ```bash
-git clone https://github.com/goatrental/Modules.git
-cd Modules
+git clone https://github.com/goatrental/modules.git
+cd modules
 docker compose up -d
 ```
 
@@ -41,7 +41,7 @@ Na téhle stránce nejsou žádné překlady, takže se smazáním nic neztratí
 Kamkoli, kde na něj kontejner dosáhne, například vedle `docker-compose.yml`:
 
 ```bash
-git clone https://github.com/goatrental/Modules.git
+git clone https://github.com/goatrental/modules.git
 ```
 
 ### Krok 2 — namountovat a přidat do addons_path
@@ -50,22 +50,22 @@ Do `docker-compose.yml` běžícího Odoo přidat volume:
 
 ```yaml
 volumes:
-  - ./Modules:/mnt/modules:ro
+  - ./modules:/mnt/modules:ro
 ```
 
 A do `odoo.conf` cestu ke složce projektu:
 
 ```ini
-addons_path = /mnt/modules/vet,/mnt/extra-addons,/usr/lib/python3/dist-packages/odoo/addons
+addons_path = /mnt/modules/elite.vet,/mnt/extra-addons,/usr/lib/python3/dist-packages/odoo/addons
 ```
 
-> Do `addons_path` patří složka **projektu** (`/mnt/modules/vet`), ne složka
+> Do `addons_path` patří složka **projektu** (`/mnt/modules/elite.vet`), ne složka
 > modulu. Odoo si moduly uvnitř najde samo.
 
 Aktualizace později:
 
 ```bash
-cd Modules
+cd modules
 git pull
 ```
 
@@ -75,7 +75,7 @@ Odoo v oficiálním image běží pod UID 101. Pokud se modul v seznamu aplikac�
 neobjeví, bývá to právy:
 
 ```bash
-sudo chown -R 101:101 Modules
+sudo chown -R 101:101 modules
 ```
 
 ### Krok 4 — instalace
@@ -113,7 +113,7 @@ Mřížka bude po instalaci prázdná — naplní se v Odoo v aplikaci
 
 | příznak | příčina |
 |---|---|
-| není v Aplikacích ani po *Aktualizovat seznam aplikací* | v `addons_path` chybí `/mnt/modules/vet`, nebo je tam uvedená složka modulu místo složky projektu |
+| není v Aplikacích ani po *Aktualizovat seznam aplikací* | v `addons_path` chybí `/mnt/modules/elite.vet`, nebo je tam uvedená složka modulu místo složky projektu |
 | v logu `Skipped unreadable module` | práva, viz krok 3 |
 | instalace spadne na duplicitní URL | nesmazaná ruční stránka `/rozpis-lekaru`, viz krok 0 |
 | aplikace je vidět, ale stránka hlásí 404 | modul nainstalovaný, ale stránka není publikovaná — Web → Stránky |

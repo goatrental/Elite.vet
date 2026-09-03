@@ -1,8 +1,8 @@
 # Odoo 18 pro moduly z tohoto repozitare.
 #
 # Cely repozitar je namountovany do /mnt/modules. Moduly jsou v nem po
-# projektech: vet/ jsou moduly Elite Vet. Dalsi projekt = dalsi slozka vedle
-# a jeden radek navic v addons_path v config/odoo.conf.
+# projektech: elite.vet/ jsou moduly kliniky Elite Vet. Dalsi projekt = dalsi
+# slozka vedle a jeden radek navic v addons_path v config/odoo.conf.
 
 services:
   odoo:
