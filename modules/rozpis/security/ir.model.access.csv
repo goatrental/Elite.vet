@@ -1,3 +1,4 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_elite_vet_shift_user,elite.vet.shift.user,model_elite_vet_shift,base.group_user,1,1,1,1
 access_elite_vet_doctor_user,elite.vet.doctor.user,model_elite_vet_doctor,base.group_user,1,1,1,1
+access_elite_vet_shift_type_user,elite.vet.shift.type.user,model_elite_vet_shift_type,base.group_user,1,1,1,1

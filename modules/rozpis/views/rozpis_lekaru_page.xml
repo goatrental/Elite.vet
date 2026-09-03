@@ -142,11 +142,8 @@
             .rs-legend-sec { background: var(--ev-muted); border-bottom: 1px solid var(--ev-border); padding: 22px 0; }
             .rs-legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 26px; }
             .rs-leg { display: inline-flex; align-items: center; gap: 10px; font-size: 14.5px; font-weight: 600; color: var(--ev-primary); }
-            .rs-leg-dot { width: 12px; height: 12px; border-radius: 9999px; flex-shrink: 0; }
-            .rs-leg-dot--am { background: var(--ev-am); }
-            .rs-leg-dot--pm { background: var(--ev-pm); }
-            .rs-leg-dot--night { background: var(--ev-night); }
-            .rs-leg-dot--we { background: var(--ev-we); }
+            /* barva puntiku prichazi z typu smeny jako inline styl */
+            .rs-leg-dot { width: 12px; height: 12px; border-radius: 9999px; flex-shrink: 0; background: var(--ev-border); }
             .rs-leg span.rs-leg-time { color: var(--ev-text-secondary); font-weight: 500; }
 
             /* ============ MĚSÍČNÍ KALENDÁŘ ============ */
@@ -187,11 +184,7 @@
 
             /* jméno lékařky + bublina s hodinami (pure CSS, bez JS) */
             .rs-doc { position: relative; display: inline-flex; align-items: flex-start; flex-wrap: wrap; gap: 4px 8px; font-size: 12.5px; font-weight: 600; line-height: 1.35; color: var(--ev-primary); cursor: default; }
-            .rs-doc::before { content: ""; width: 7px; height: 7px; margin-top: 5px; border-radius: 9999px; flex-shrink: 0; background: var(--ev-border); }
-            .rs-slot--am .rs-doc::before { background: var(--ev-am); }
-            .rs-slot--pm .rs-doc::before { background: var(--ev-pm); }
-            .rs-slot--night .rs-doc::before { background: var(--ev-night); }
-            .rs-slot--we .rs-doc::before { background: var(--ev-we); }
+            .rs-dot { width: 7px; height: 7px; margin-top: 5px; border-radius: 9999px; flex-shrink: 0; background: var(--ev-border); }
 
             .rs-tip { position: absolute; left: 0; bottom: calc(100% + 9px); transform: translateY(5px); background: var(--ev-primary); color: #fff; padding: 8px 14px; border-radius: 11px; font-size: 12.5px; font-weight: 700; white-space: nowrap; opacity: 0; visibility: hidden; pointer-events: none; z-index: 40; box-shadow: 0 16px 34px -14px rgba(9,15,28,.75); transition: opacity .18s ease, transform .18s ease, visibility .18s ease; }
             .rs-tip::after { content: ""; position: absolute; top: 100%; left: 18px; border: 6px solid transparent; border-top-color: var(--ev-primary); }
@@ -431,22 +424,16 @@
             <section class="rs-legend-sec o_colored_level">
                 <div class="ev-container">
                     <div class="rs-legend">
-                        <div class="rs-leg">
-                            <span class="rs-leg-dot rs-leg-dot--am"></span>
-                            Ranní služba <span class="rs-leg-time">8:00–14:00</span>
-                        </div>
-                        <div class="rs-leg">
-                            <span class="rs-leg-dot rs-leg-dot--pm"></span>
-                            Odpolední služba <span class="rs-leg-time">14:00–20:00</span>
-                        </div>
-                        <div class="rs-leg">
-                            <span class="rs-leg-dot rs-leg-dot--night"></span>
-                            Noční služba <span class="rs-leg-time">20:00–8:00</span>
-                        </div>
-                        <div class="rs-leg">
-                            <span class="rs-leg-dot rs-leg-dot--we"></span>
-                            Víkendová služba <span class="rs-leg-time">10:00–18:00</span>
-                        </div>
+                        <!-- Vysvětlivky se generují z typů směn (Odoo: Rozpis služeb -> Typy směn),
+                             takže změna času nebo barvy je vidět tady i v kalendáři níž. -->
+                        <t t-set="ev_has_t" t-value="'elite.vet.shift.type' in request.env"/>
+                        <t t-set="ev_types" t-value="request.env['elite.vet.shift.type'].sudo().search([('is_closed', '=', False)]) if ev_has_t else []"/>
+                        <t t-foreach="ev_types" t-as="ev_t">
+                            <div class="rs-leg">
+                                <span class="rs-leg-dot" t-attf-style="background: #{ev_t.color_hex};"></span>
+                                <t t-esc="ev_t.name"/> <span class="rs-leg-time" t-esc="ev_t.time_display"></span>
+                            </div>
+                        </t>
                     </div>
                 </div>
             </section>
@@ -467,8 +454,6 @@
                         Čísla dnů, prázdné buňky i názvy měsíců se počítají samy.
                     -->
                     <t t-set="ev_months" t-value="['Leden', 'Únor', 'Březen', 'Duben', 'Květen', 'Červen', 'Červenec', 'Srpen', 'Září', 'Říjen', 'Listopad', 'Prosinec']"/>
-                    <t t-set="ev_kinds" t-value="{'am': 'Ranní', 'pm': 'Odpolední', 'night': 'Noční', 'we': 'Víkendová'}"/>
-                    <t t-set="ev_hours" t-value="{'am': '8:00–14:00', 'pm': '14:00–20:00', 'night': '20:00–8:00', 'we': '10:00–18:00'}"/>
                     <t t-set="ev_cellno" t-value="[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41]"/>
                     <t t-set="ev_base" t-value="datetime.date.today().replace(day=1)"/>
                     <!-- pojistka: kdyby modul nebyl nainstalovaný, stránka se vykreslí prázdná místo chyby 500 -->
@@ -486,7 +471,7 @@
                         <t t-set="ev_recs" t-value="request.env['elite.vet.shift'].sudo().search([
                                 ('date', '&gt;=', ev_gstart.strftime('%Y-%m-%d')),
                                 ('date', '&lt;', ev_gend.strftime('%Y-%m-%d'))
-                            ], order='date asc, shift_type asc') if ev_has else []"/>
+                            ], order='date asc') if ev_has else []"/>
 
                         <div class="rs-month">
                             <div class="rs-month-head">
@@ -523,12 +508,12 @@
                                                     <div class="rs-cell-top"><span class="rs-num" t-esc="ev_d.day"/></div>
                                                     <t t-foreach="ev_recs" t-as="ev_r">
                                                         <t t-if="ev_r.date == ev_d">
-                                                            <t t-if="ev_r.shift_type == 'closed'">
-                                                                <div class="rs-cell-note"><t t-esc="ev_r.note or 'Zavřeno'"/></div>
+                                                            <t t-if="ev_r.type_id.is_closed">
+                                                                <div class="rs-cell-note"><t t-esc="ev_r.note or ev_r.type_id.name"/></div>
                                                             </t>
                                                             <t t-else="">
-                                                                <div t-attf-class="rs-slot rs-slot--#{ev_r.shift_type}">
-                                                                    <span class="rs-doc"><t t-esc="ev_r.doctor_id.name"/><span class="rs-tip"><t t-esc="ev_kinds[ev_r.shift_type]"/> · <t t-esc="ev_hours[ev_r.shift_type]"/></span></span>
+                                                                <div class="rs-slot">
+                                                                    <span class="rs-doc"><span class="rs-dot" t-attf-style="background: #{ev_r.type_id.color_hex};"></span><t t-esc="ev_r.doctor_id.name"/><span class="rs-tip"><t t-esc="ev_r.type_id.name"/> · <t t-esc="ev_r.type_id.time_display"/></span></span>
                                                                 </div>
                                                             </t>
                                                         </t>

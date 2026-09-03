@@ -1,6 +1,6 @@
 {
     "name": "Elite Vet - Rozpis sluzeb",
-    "version": "18.0.2.0.0",
+    "version": "18.0.3.0.0",
     "category": "Website",
     "summary": "Rozpis sluzeb lekaru: jednoducha aplikace v Odoo a mesicni kalendar na webu.",
     "description": """
@@ -15,8 +15,8 @@ Zadavani je zamerne co nejjednodussi. Jeden radek rozpisu ma tri udaje:
 * **Lekarka** (vyber ze seznamu lekarek kliniky)
 * **Smena** (Ranni / Odpoledni / Nocni / Vikendova / Zavreno)
 
-Casy se nezadavaji, jsou dane typem smeny. Zadna dalsi pole, zadni ucastnici,
-zadne upominky.
+Casy se u smeny nezadavaji, jsou dane jejim typem. Typy smen maji vlastni
+seznam, kde jde zmenit cas i barvu, a zmena se hned projevi na webu.
 
 Na webu se z toho vykresli mesicni kalendar na aktualni a nasledujici mesic.
 Cisla dnu, prazdne bunky i nazvy mesicu se pocitaji samy.
@@ -30,10 +30,12 @@ Navigace stranky se bere z menu webu, takze odkazy jdou menit v Odoo
     "depends": ["website"],
     "data": [
         "security/ir.model.access.csv",
+        "data/vet_shift_type_data.xml",
         "data/vet_doctor_data.xml",
         "data/website_menu.xml",
-        "views/vet_shift_views.xml",
+        "views/vet_shift_type_views.xml",
         "views/vet_doctor_views.xml",
+        "views/vet_shift_views.xml",
         "views/menus.xml",
         "views/rozpis_lekaru_page.xml",
     ],

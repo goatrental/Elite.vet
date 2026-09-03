@@ -5,18 +5,14 @@ používá.
 
 ```
 Elite.vet/
-├── docker-compose.yml     Odoo 18 + PostgreSQL, ./Modules jako addons
+├── docker-compose.yml     Odoo 18 + PostgreSQL, ./modules jako addons
 ├── config/odoo.conf       addons_path, připojení k databázi
-└── Modules/
-    └── elite/             moduly kliniky Elite Vet
-        └── rozpis/        Rozpis služeb lékařů
+└── modules/
+    └── rozpis/            Rozpis služeb lékařů
 ```
 
-Nový modul = nová podsložka v `Modules/elite/`. Nic dalšího se nenastavuje,
-Docker tu složku už má namountovanou jako addons.
-
-Moduly jiného klienta patří do vlastní podsložky vedle `elite/`. Pak se do
-`addons_path` v `config/odoo.conf` přidá i ta cesta.
+Nový modul = nová podsložka v `modules/`. Nic dalšího se nenastavuje, Docker
+tu složku už má namountovanou jako addons.
 
 ## Spuštění
 
@@ -44,7 +40,8 @@ Zadávání je záměrně co nejjednodušší — jeden řádek má tři údaje:
 | Lékařka | výběr ze seznamu lékařek kliniky |
 | Směna | Ranní / Odpolední / Noční / Víkendová / Zavřeno |
 
-Časy se nezadávají, jsou dané typem směny:
+Časy se u směny nezadávají, nese je její typ. V položce **Typy směn** jde
+změnit čas i barvu a projeví se to na webu:
 
 | Směna | Čas | Barva na webu |
 |---|---|---|
@@ -54,4 +51,4 @@ Zadávání je záměrně co nejjednodušší — jeden řádek má tři údaje:
 | Víkendová | 10:00–18:00 | růžová |
 | Zavřeno | — | červený text z poznámky |
 
-Detaily v [Modules/elite/rozpis/README.md](Modules/elite/rozpis/README.md).
+Detaily v [modules/rozpis/README.md](modules/rozpis/README.md).

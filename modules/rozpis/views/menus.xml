@@ -5,4 +5,6 @@
               action="action_vet_shift" sequence="10"/>
     <menuitem id="menu_rozpis_doctor" name="Lékařky" parent="menu_rozpis_root"
               action="action_vet_doctor" sequence="20"/>
+    <menuitem id="menu_rozpis_type" name="Typy směn" parent="menu_rozpis_root"
+              action="action_vet_shift_type" sequence="30"/>
 </odoo>

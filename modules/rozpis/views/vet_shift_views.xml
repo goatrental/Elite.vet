@@ -2,8 +2,8 @@
 <odoo>
     <!--
         Cele ovladani rozpisu jsou tri sloupce: Datum, Lekarka, Smena.
-        Casy se nezadavaji, jsou dane typem smeny. Poznamka je skryty sloupec
-        a pouziva se jen u zavreno.
+        Casy se tu nezadavaji, jsou dane typem smeny (Rozpis sluzeb -> Typy smen).
+        Poznamka je skryty sloupec a pouziva se jen u zavreno.
     -->
 
     <record id="view_vet_shift_list" model="ir.ui.view">
@@ -11,9 +11,10 @@
         <field name="model">elite.vet.shift</field>
         <field name="arch" type="xml">
             <list string="Rozpis služeb" editable="bottom" multi_edit="1">
+                <field name="is_closed" column_invisible="1"/>
                 <field name="date" string="Datum"/>
-                <field name="doctor_id" string="Lékařka"/>
-                <field name="shift_type" string="Směna"/>
+                <field name="doctor_id" string="Lékařka" readonly="is_closed"/>
+                <field name="type_id" string="Směna"/>
                 <field name="note" string="Poznámka" optional="hide"/>
             </list>
         </field>
@@ -26,10 +27,11 @@
             <form string="Směna">
                 <sheet>
                     <group>
+                        <field name="is_closed" invisible="1"/>
                         <field name="date"/>
-                        <field name="shift_type"/>
-                        <field name="doctor_id" invisible="shift_type == 'closed'"/>
-                        <field name="note" invisible="shift_type != 'closed'" placeholder="např. Státní svátek"/>
+                        <field name="type_id"/>
+                        <field name="doctor_id" invisible="is_closed"/>
+                        <field name="note" invisible="not is_closed" placeholder="např. Státní svátek"/>
                     </group>
                 </sheet>
             </form>
@@ -40,9 +42,9 @@
         <field name="name">elite.vet.shift.calendar</field>
         <field name="model">elite.vet.shift</field>
         <field name="arch" type="xml">
-            <calendar string="Rozpis služeb" date_start="date" color="shift_type" mode="month" event_limit="6">
+            <calendar string="Rozpis služeb" date_start="date" color="type_id" mode="month" event_limit="6">
                 <field name="doctor_id"/>
-                <field name="shift_type"/>
+                <field name="type_id"/>
             </calendar>
         </field>
     </record>
@@ -58,7 +60,7 @@
                         domain="[('date', '&gt;=', context_today().strftime('%Y-%m-%d'))]"/>
                 <group expand="0" string="Seskupit podle">
                     <filter name="group_doctor" string="Lékařka" context="{'group_by': 'doctor_id'}"/>
-                    <filter name="group_type" string="Směna" context="{'group_by': 'shift_type'}"/>
+                    <filter name="group_type" string="Směna" context="{'group_by': 'type_id'}"/>
                     <filter name="group_date" string="Měsíc" context="{'group_by': 'date:month'}"/>
                 </group>
             </search>
@@ -72,7 +74,7 @@
         <field name="context">{'search_default_od_dneska': 1}</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">Přidejte první směnu</p>
-            <p>Vyplňte datum, vyberte lékařku a typ směny. Víc není potřeba —
+            <p>Vyplňte datum, vyberte lékařku a směnu. Víc není potřeba —
                na webu se to objeví samo.</p>
         </field>
     </record>

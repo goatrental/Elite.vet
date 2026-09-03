@@ -1,6 +1,6 @@
 # Nasazení přes Docker
 
-Repozitář obsahuje hotovou sestavu. Složka `Modules/` je namountovaná jako
+Repozitář obsahuje hotovou sestavu. Složka `modules/` je namountovaná jako
 addons, takže se moduly nikam nekopírují — stačí je mít v repozitáři.
 
 ---
@@ -55,11 +55,11 @@ cd /cesta/k/addons
 git clone https://github.com/goatrental/Elite.vet.git elitevet
 ```
 
-Vznikne `/cesta/k/addons/elitevet/Modules/elite/rozpis/`. Do `addons_path` se pak
-přidá cesta k `Modules/elite`:
+Vznikne `/cesta/k/addons/elitevet/modules/rozpis/`. Do `addons_path` se pak
+přidá cesta k `modules`:
 
 ```ini
-addons_path = /mnt/extra-addons/elitevet/Modules/elite,/mnt/extra-addons,/usr/lib/python3/dist-packages/odoo/addons
+addons_path = /mnt/extra-addons/elitevet/modules,/mnt/extra-addons,/usr/lib/python3/dist-packages/odoo/addons
 ```
 
 Aktualizace později:
@@ -113,7 +113,7 @@ Mřížka bude po instalaci prázdná — naplní se v Odoo v aplikaci
 
 | příznak | příčina |
 |---|---|
-| není v Aplikacích ani po *Aktualizovat seznam aplikací* | složka `Modules/elite` není v `addons_path` |
+| není v Aplikacích ani po *Aktualizovat seznam aplikací* | složka `modules` není v `addons_path` |
 | v logu `Skipped unreadable module` | práva, viz krok 3 |
 | instalace spadne na duplicitní URL | nesmazaná ruční stránka `/rozpis-lekaru`, viz krok 0 |
 | aplikace je vidět, ale stránka hlásí 404 | modul nainstalovaný, ale web není publikovaný — Web → Stránky |
