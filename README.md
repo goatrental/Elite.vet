@@ -5,14 +5,18 @@ používá.
 
 ```
 Elite.vet/
-├── docker-compose.yml     Odoo 18 + PostgreSQL, ./modules jako addons
+├── docker-compose.yml     Odoo 18 + PostgreSQL, ./Modules jako addons
 ├── config/odoo.conf       addons_path, připojení k databázi
-└── modules/
-    └── rozpis/            Rozpis služeb lékařů
+└── Modules/
+    └── elite/             moduly kliniky Elite Vet
+        └── rozpis/        Rozpis služeb lékařů
 ```
 
-Nový modul = nová podsložka v `modules/`. Nic dalšího se nenastavuje, Docker
-tu složku už má namountovanou jako addons.
+Nový modul = nová podsložka v `Modules/elite/`. Nic dalšího se nenastavuje,
+Docker tu složku už má namountovanou jako addons.
+
+Moduly jiného klienta patří do vlastní podsložky vedle `elite/`. Pak se do
+`addons_path` v `config/odoo.conf` přidá i ta cesta.
 
 ## Spuštění
 
@@ -50,4 +54,4 @@ Zadávání je záměrně co nejjednodušší — jeden řádek má tři údaje:
 | Víkendová | 10:00–18:00 | růžová |
 | Zavřeno | — | červený text z poznámky |
 
-Detaily v [modules/rozpis/README.md](modules/rozpis/README.md).
+Detaily v [Modules/elite/rozpis/README.md](Modules/elite/rozpis/README.md).

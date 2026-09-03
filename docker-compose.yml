@@ -1,6 +1,6 @@
 # Odoo 18 pro Elite Vet.
-# Slozka ./modules je namountovana jako addons, takze kazdy modul v ni
-# je pro Odoo rovnou k dispozici. Novy modul = nova podslozka v ./modules.
+# Slozka ./Modules je namountovana jako addons. Moduly jsou v ni po klientech,
+# proto addons_path v config/odoo.conf ukazuje na /mnt/extra-addons/elite.
 
 services:
   odoo:
@@ -12,7 +12,7 @@ services:
       - "8069:8069"
     volumes:
       - odoo-data:/var/lib/odoo
-      - ./modules:/mnt/extra-addons
+      - ./Modules:/mnt/extra-addons
       - ./config:/etc/odoo
     environment:
       HOST: db

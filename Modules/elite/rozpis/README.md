@@ -56,4 +56,4 @@ přesunout i smazat.
 * Multi-website: `website_id` není nastavené, stránka je na všech webech
   v databázi. Pro omezení jen na Elite Vet doplňte pole do záznamu `website.page`.
 
-Nasazení přes Docker: [../../DOCKER.md](../../DOCKER.md).
+Nasazení přes Docker: [../../../DOCKER.md](../../../DOCKER.md).
